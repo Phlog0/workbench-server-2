@@ -148,6 +148,11 @@ app.get('/transformersForOwnNeeds', async (req, res) => {
   const answer = await getDataTable('./data/Трансформаторы собственных нужд.xlsx');
   res.json(answer)
 })
+app.get('/zeroSequenceCurrentTransformers', async (req, res) => {
+
+  const answer = await getDataTable('./data/Трансформаторы тока нулевой последовательности.xlsx');
+  res.json(answer)
+})
 
 app.get('/currentTransformatorOption', async (req, res) => {
 
@@ -189,14 +194,16 @@ app.get('/myapp', async (req, res) => {
 
   // const [answer, _] = await getData('./data/6(10) кВ/copy.xlsx');
   // const answer = fs.readFile('./myTest.json');
-  fs.readFile('./myTest.json', 'utf8', (err, data) => {
-    if (err) {
-      console.error(err);
-      return;
-    }
-    res.json(data)
-  });
-  
+
+    fs.readFile('./myTest.json', 'utf8', (err, data) => {
+      if (err) {
+        res.json(err)
+      }
+      res.json(data)
+    });
+ 
+
+
 })
 
 
