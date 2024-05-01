@@ -102,6 +102,7 @@ router.patch('/updateSamoproverka', DatabaseController.updateSamoproverka)
 //====================================== PROJECT ======================================
 
 
+router.get('/findOrCreateAndGetProject', DatabaseController.findOrCreateAndGetProject)
 router.get('/getAllProjectsList', DatabaseController.getAllProjectsList)
 router.post('/createNewProject/:id', DatabaseController.createProject)
 router.patch('/importProject/:projectId', DatabaseController.importProject)

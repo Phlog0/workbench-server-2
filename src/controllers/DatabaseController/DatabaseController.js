@@ -12,6 +12,136 @@ class DatabaseController {
 
 
     //====================================== PROJECT ======================================
+
+    async findOrCreateAndGetProject(req, res) {
+        try {
+            const { projectId, tCount } = req.query;
+            console.log(1111111111111111111111111111111)
+            console.log(projectId, tCount)
+            console.log(111111111111111111111111)
+            if (!projectId || !tCount) {
+                res.status(400).json({ masseage: 'нет требуемых параметров' })
+                return
+            }
+            const project = await db.Project.findByPk(projectId)
+            if (project === null) {
+                const newProject = await db.Project.create({
+                    id: projectId,
+                    info: 'info',
+                    name: 'name',
+                })
+                const newMainNodeId = uuidv4();
+
+                const newMainNode = await db.MainNode.create({
+                    // id: req.body.mainNodeId, 🔮🔮🔮🔮🔮🔮🔮
+                    id: newMainNodeId,  //🔥🔥🔥🔥🔥🔥🔥🔥🔥
+                    projectId: newProject.id,
+                    position: { x: 0, y: 0 },
+                    totalVoltageForAll: 10,
+
+
+                })
+
+                let newTires = [];
+
+                for (let i = 0; i < tCount; i++) {
+                    const newTireId = uuidv4();
+                    newTires.push({
+                        // id: req.body.tireIds[i], 🔮🔮🔮🔮🔮🔮🔮
+                        id: newTireId,  //🔥🔥🔥🔥🔥🔥🔥🔥🔥
+                        position: { x: 675 * i, y: 100 },
+                        parentNode: newMainNode.id,
+                        createdAt: `${Date.now() + i}`,
+                        style: { width: 360, height: 30 }
+                    })
+                }
+
+
+
+                const fasteners = []
+                for (let i = 0; i < newTires.length; i++) {
+                    const tireWidth = newTires[i].style.width;
+                    let j = 1
+                    while (tireWidth / (176 * j) > 1.2) {
+                        console.log(newTires[i].id);
+                        fasteners.push({
+                            id: uuidv4(),
+                            parentNode: newTires[i].id,
+                            type: "FastenerNodeType",
+                            style: { width: 10, height: 10 },
+                            position: { x: 176 * (j), y: 0 },
+                            projectId: newProject.id,
+                            createdAt: `${Date.now() + i}`,
+
+                        })
+                        j++;
+                    }
+                }
+
+
+                const result = await db.Tire.bulkCreate(newTires);
+                const fastRes = await db.Fastener.bulkCreate(fasteners)
+            }
+            const currentProject = await db.Project.findByPk(projectId)
+            const currentMainNode = await db.MainNode.findOne({
+                where: {
+                    projectId: currentProject.id
+                }
+            })
+            const currentTires = await db.Tire.findAll({
+                where: {
+                    parentNode: currentMainNode.id
+                },
+                order: [
+                    ['createdAt', 'ASC']
+                ]
+            })
+            const currentFasteners = await db.Fastener.findAll({
+                where: {
+                    projectId: currentProject.id
+                },
+                order: [
+                    ['createdAt', 'ASC']
+                ]
+            })
+
+
+            const currentSfkafs = await db.Shkaf.findAll({
+                where: {
+
+                    projectId: currentProject.id
+                }
+            })
+
+            const currentStencils = await db.Stencil.findAll({
+                where: {
+                    projectId: currentProject.id
+                }
+            })
+            const currentEdges = await db.Edge.findAll({
+
+                where: {
+
+                    projectId: currentProject.id
+                }
+            })
+
+            // const finalShkafs = [...currentSfkafs].sort((a, b) => a.indexInGroup - b.indexInGroup)
+
+            const data = {
+                nodes: [currentMainNode, ...currentTires, ...currentFasteners, ...currentSfkafs, ...currentStencils],
+                edges: [...currentEdges]
+            }
+
+
+            res.json(data)
+        } catch (error) {
+            res.status(400).json({ message: `${error}` })
+        }
+    }
+
+
+
     async createProject(req, res) {
         try {
 
@@ -162,7 +292,7 @@ class DatabaseController {
 
             const currentProject = await db.Project.findByPk(req.params.id);
             if (!currentProject) {
-                res.json('Такого проекта не существует')
+                res.status(400).json({ message: 'NO PROJECT' })
                 return
             }
             const currentMainNode = await db.MainNode.findOne({
@@ -215,7 +345,8 @@ class DatabaseController {
                 edges: [...currentEdges]
             }
             // const data = [currentMainNode, ...currentTires, ...currentFasteners, ...currentSfkafs, ...currentStencils]
-            res.json(JSON.stringify(data))
+            // res.json(JSON.stringify(data))
+            res.json(data)
         } catch (error) {
             res.json(error)
         }
