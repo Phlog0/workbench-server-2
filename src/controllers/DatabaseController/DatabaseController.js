@@ -91,6 +91,7 @@ class DatabaseController {
 
             const { projectId } = req.params;
             const { newItems } = req.body
+            console.log(newItems)
             await db.MainNode.destroy({
                 where: {
                     projectId
@@ -120,7 +121,7 @@ class DatabaseController {
             })
 
             console.log(111111111111111111111111111111111);
-            console.log(shkafDel, currentEdges, projectId);
+            // console.log(shkafDel, currentEdges, projectId);
 
             const newMainNode = newItems.nodes.find(item => item.type === 'MainSchemeType')
             console.log(newMainNode);
@@ -141,8 +142,8 @@ class DatabaseController {
             const newShkafs = newItems.nodes.filter(item => item.type === 'ElectricalPanelsNodeType')
             const newStencils = newItems.nodes.filter(item => item.type === 'ImageNodeType')
             const newEdges = newItems.edges
-            console.log(111111111111111);
-            console.log(newEdges);
+            // console.log(111111111111111);
+            // console.log(newEdges);
 
             const resTires = await db.Tire.bulkCreate(newTires);
             const resFasteners = await db.Fastener.bulkCreate(newFasteners);
